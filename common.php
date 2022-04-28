@@ -11,7 +11,7 @@ const user = "a637m351";
 /**
  * @brief Uses exercise01.sql to configure the database with the user and post tables.
  */
-function configure_db( string $script )
+function configure_db( $script )
 {
     $result = "";
     $query = file_get_contents( $script );
