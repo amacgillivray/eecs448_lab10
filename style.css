@@ -1,0 +1,12 @@
+body {
+    font-family: "helvetica", "arial", san-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+}
+
+label {
+    padding: 5px;
+}
