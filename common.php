@@ -5,10 +5,39 @@
  *        stored in home folder (outside web root) for security
  */
 require_once("/home/a637m351/eecs448lab10pw.php");
+
+/**
+ * @const debug
+ * @brief Toggles debugging statements. Note that while prepared statements
+ *        protect from sql injection, enabling debugging may print untrusted 
+ *        user input to the page and break the code. Thus, this value should 
+ *        ABSOLUTELY be set to false in release.
+ */
 const debug = 0;
+
+/**
+ * @const host
+ * @brief SQL host
+ */
 const host = "mysql.eecs.ku.edu";
+
+/**
+ * @const user
+ * @brief SQL user
+ */
 const user = "a637m351";
+
+/**
+ * @const db
+ * @brief Name of the SQL db to use.
+ */
 const db   = user;
+
+/**
+ * @const errmode
+ * @brief mysqli error flags to use when initializing connections
+ *        in common functions.
+ */
 const errmode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
 
 const query_modes = [
@@ -179,10 +208,14 @@ function create_user( $user )
         return false;
 }
 
-// function create_post( $user, $text )
-// {
-// 
-// }
+function create_post( $user, $text )
+{
+    return call_procedure(
+        queries["posts"]["create"],
+        [],
+        [$user, $text],
+    );
+}
 
 
 function user_exists( $user )
@@ -218,12 +251,6 @@ function user_exists_cb($sql, $stmt, $user)
     
     $sql->close();
     return $user_exists;
-}
-
-function create_post(
-    
-) {
-    return true;
 }
 
 function html_open( $title )
