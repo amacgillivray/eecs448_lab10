@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS users
     PRIMARY KEY (user_id)
 ) //
 
-DROP TABLE posts;
 CREATE TABLE IF NOT EXISTS posts
 (
     post_id INT NOT NULL AUTO_INCREMENT,
