@@ -13,7 +13,7 @@ require_once("/home/a637m351/eecs448lab10pw.php");
  *        user input to the page and break the code. Thus, this value should 
  *        ABSOLUTELY be set to false in release.
  */
-const debug = 1;
+const debug = 0;
 
 /**
  * @const host
@@ -155,7 +155,7 @@ function call_procedure(
         if ($fwparms) $cbparms = array_merge( $parms, $cbparms );
         return $cb($sql, $stmt, ...$cbparms);
     } else {
-        print "Executing...";
+        if (debug) print "Executing...";
         $res = mysqli_stmt_execute($stmt);
                 if (debug) print "Executed.\n";
                 // if (debug) var_dump($stmt);
@@ -310,6 +310,68 @@ function view_user_posts_cb($sql, $stmt)
     print "</tbody></table>";
 }
 
+function create_delete_view()
+{
+    return call_procedure(
+        queries["users"]["view"],
+        [],
+        [],
+        [],
+        "delete_view_cb"
+    );
+}
+
+function delete_view_cb( $sql, $stmt )
+{
+    $users = [];
+    do {
+        if ($result = mysqli_stmt_get_result($stmt))
+        {
+            $crawl = $result->fetch_all();
+            for ($i = 0; $i < sizeof($crawl); $i++)
+                $users[] = $crawl[$i][0];
+        }
+    } while (mysqli_stmt_next_result($stmt) && !$user_exists);
+    
+    // var_dump($users);
+    
+    for ($i = 0; $i < sizeof($users); $i++)
+    {
+        $user = $users[$i];
+        call_procedure(
+            queries["posts"]["view"],
+            ["s"],
+            [$user],
+            [$user],
+            "delete_view_user_cb"
+        );
+    }
+}
+
+function delete_view_user_cb( $sql, $stmt, $user )
+{
+    do {
+        if ($result = mysqli_stmt_get_result($stmt))
+        {
+            $crawl = $result->fetch_all();
+            for ($i = 0; $i < sizeof($crawl); $i++)
+                print "<tr>" . 
+                      "<td>$user</td>" .
+                      "<td>" . $crawl[$i][1] . "</td>" .
+                      "<td><input type=\"checkbox\" name=\"del" . $crawl[$i][0] . "\" value=\"" . $crawl[$i][0] . "\"></td>" .
+                      "</tr>";
+        }
+    } while (mysqli_stmt_next_result($stmt) && !$user_exists);
+}
+
+function delete_post( $post )
+{
+    return call_procedure(
+        queries["posts"]["delete"],
+        ["i"],
+        [$post]
+    );
+}
 
 function html_open( $title )
 {
@@ -323,10 +385,12 @@ function html_open( $title )
         <body>';
 }
 
-function html_close()
+function html_close( $admin = false )
 {
-    print '<footer>
-           <a href="./index.html">&laquo; Back to Index</a>
-           </footer>';
-    print '</body></html>';
+    print '<footer>';
+    if ($admin) 
+        print '<a href="./adminhome.html">&laquo; Back to Admin Home</a>';
+    else
+        print '<a href="./index.html">&laquo; Back to Index</a>';
+    print '</footer></body></html>';
 }
