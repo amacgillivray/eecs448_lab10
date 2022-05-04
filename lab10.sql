@@ -7,11 +7,12 @@ CREATE TABLE IF NOT EXISTS users
     PRIMARY KEY (user_id)
 ) //
 
+DROP TABLE posts;
 CREATE TABLE IF NOT EXISTS posts
 (
     post_id INT NOT NULL AUTO_INCREMENT,
-    content TEXT NOT NULL,
     author_id VARCHAR(30) NOT NULL,
+    content TEXT NOT NULL,
     PRIMARY KEY (post_id),
     INDEX ( author_id ),
     FOREIGN KEY (author_id)
@@ -47,14 +48,14 @@ END//
 DROP PROCEDURE addpost;
 CREATE PROCEDURE 
     addpost ( 
-        IN arguser VARCHAR (30),
-        IN argpost TEXT
-)
+        IN arguser VARCHAR (30) NOT NULL,
+        IN argpost TEXT NOT NULL
+    )
 LANGUAGE SQL
 MODIFIES SQL DATA
 BEGIN 
-    INSERT INTO posts ( content, author_id ) 
-    VALUES ( argpost, arguser );
+    INSERT INTO posts ( author_id, content ) 
+    VALUES ( arguser, argpost );
 END//
 -- REMOVE POST
 DROP PROCEDURE removepost;
