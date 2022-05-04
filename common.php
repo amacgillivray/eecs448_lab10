@@ -78,12 +78,7 @@ function configure_db( $script )
         printf("Connect failed: %s\n", $mysqli->connect_error);
         return false;
     }
-
-    if ($result = $sql->query($query))
-    {
-        $result->free();
-    }
-
+    $sql->query($query);
     $sql->close();
     return true;
 }
@@ -282,6 +277,64 @@ function view_users_cb($sql, $stmt)
         }
     } while (mysqli_stmt_next_result($stmt) && !$user_exists);
 }
+
+function select_users()
+{
+    return call_procedure(
+        queries["users"]["view"],
+        [],
+        [],
+        [],
+        "select_users_cb"
+    );
+}
+
+function select_users_cb($sql, $stmt)
+{
+    print "<label for=\"user\">Select User</label>";
+    print "<select name=\"user\" id=\"user\">";
+    do {
+        if ($result = mysqli_stmt_get_result($stmt))
+        {
+            $crawl = $result->fetch_all();
+            for ($i = 0; $i < sizeof($crawl); $i++)
+                print     "<option value=\"" . $crawl[$i][0] . "\">" 
+                        . $crawl[$i][0] 
+                        . "</option>";
+        }
+    } while (mysqli_stmt_next_result($stmt) && !$user_exists);
+    print "</select>";
+}
+
+function view_user_posts( $user )
+{
+    return call_procedure(
+        queries["posts"]["view"],
+        ["s"],
+        [$user],
+        [],
+        "view_user_posts_cb"
+    );
+}
+
+function view_user_posts_cb($sql, $stmt)
+{
+    print   '<table>' .
+            '<thead><th>ID</th><th>Content</th></thead><tbody>';
+    do {
+        if ($result = mysqli_stmt_get_result($stmt))
+        {
+            $crawl = $result->fetch_all();
+            for ($i = 0; $i < sizeof($crawl); $i++)
+                print   "<tr>" .
+                        "<td>".$crawl[$i][0]."</td>" .
+                        "<td>".$crawl[$i][1]."</td>" .
+                        "</tr>";
+        }
+    } while (mysqli_stmt_next_result($stmt) && !$user_exists);
+    print "</tbody></table>";
+}
+
 
 function html_open( $title )
 {

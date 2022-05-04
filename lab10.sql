@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS posts
 (
     post_id INT NOT NULL AUTO_INCREMENT,
-    author_id VARCHAR(30) NOT NULL,
     content TEXT NOT NULL,
+    author_id VARCHAR(30) NOT NULL,
     PRIMARY KEY (post_id),
     INDEX ( author_id ),
     FOREIGN KEY (author_id)
@@ -47,8 +47,8 @@ END//
 DROP PROCEDURE addpost;
 CREATE PROCEDURE 
     addpost ( 
-        IN arguser VARCHAR (30) NOT NULL,
-        IN argpost TEXT NOT NULL
+        IN arguser VARCHAR (30),
+        IN argpost TEXT
     )
 LANGUAGE SQL
 MODIFIES SQL DATA
@@ -72,7 +72,7 @@ END//
 DROP PROCEDURE viewuserposts;
 CREATE PROCEDURE 
     viewuserposts ( 
-        IN arguser_id VARCHAR (30) NOT NULL
+        IN arguser_id VARCHAR (30)
     )
 LANGUAGE SQL
 READS SQL DATA
