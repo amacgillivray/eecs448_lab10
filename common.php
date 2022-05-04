@@ -167,30 +167,29 @@ function call_procedure(
     mysqli_stmt_prepare($stmt, $query);
         if (debug) print "Prepared statement.\n";
 
+    $typestring = "";
     for ($i = 0; $i < sizeof($parms); $i++)
-    {
-        $type = (isset($ptype[$i])) ? $ptype[$i] : "s";
-        mysqli_stmt_bind_param(
-            $stmt,
-            $type,
-            $parms[$i]
-        );
-        if (debug) print "Bound parameter $i: $parms[$i].\n";
-    }
-    
-    if (debug) print "</pre>";
+        $typestring .= (isset($ptype[$i])) ? $ptype[$i] : "s";
+    mysqli_stmt_bind_param(
+        $stmt,
+        $typestring,
+        ...$parms
+    );
     
     if ($cb != null)
     {
         mysqli_stmt_execute($stmt);
             if (debug) print "Executed.\n";
-            if (debug) var_dump($stmt);
+            // if (debug) var_dump($stmt);
+        if (debug) print "</pre>";
         if ($fwparms) $cbparms = array_merge( $parms, $cbparms );
         return $cb($sql, $stmt, ...$cbparms);
     } else {
+        print "Executing...";
         $res = mysqli_stmt_execute($stmt);
                 if (debug) print "Executed.\n";
-                if (debug) var_dump($stmt);
+                // if (debug) var_dump($stmt);
+        if (debug) print "</pre>";
         $sql->close();
         return $res;
     }
@@ -210,11 +209,15 @@ function create_user( $user )
 
 function create_post( $user, $text )
 {
-    return call_procedure(
-        queries["posts"]["create"],
-        [],
-        [$user, $text],
-    );
+    if (user_exists($user)) {
+        return call_procedure(
+            queries["posts"]["create"],
+            [],
+            [$user, $text]
+        );
+    } else {
+        return false;
+    }
 }
 
 
@@ -232,23 +235,26 @@ function user_exists( $user )
 function user_exists_cb($sql, $stmt, $user)
 {
     $user_exists = false;
-    while (!$user_exists)
-    {
-        $r = mysqli_stmt_get_result($stmt);
-        if (debug) var_dump($r);
-        
-        $ru = mysqli_fetch_row($r)[0];
-        if (debug) print "\nChecking user: " . $ru . "\n";
     
-        if ($r === false)
-            break;
-        if ($ru == $user)
-            $user_exists = true;
-    }
+    do {
+        if ($result = mysqli_stmt_get_result($stmt))
+        {
+            $crawl = $result->fetch_all();
+            for ($i = 0; $i < sizeof($crawl); $i++)
+            {
+                if ($crawl[$i][0] == $user)
+                {
+                    $user_exists = true;
+                    break;
+                }
+            }
+        }
+    } while (mysqli_stmt_next_result($stmt) && !$user_exists);
     
     if (debug) print "Evaluated all results.\n";
     if (debug) print "</pre>";
     
+    mysqli_stmt_free_result($stmt);
     $sql->close();
     return $user_exists;
 }
