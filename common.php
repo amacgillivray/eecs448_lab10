@@ -5,7 +5,7 @@
  *        stored in home folder (outside web root) for security
  */
 require_once("/home/a637m351/eecs448lab10pw.php");
-const debug = 1;
+const debug = 0;
 const host = "mysql.eecs.ku.edu";
 const user = "a637m351";
 const db   = user;
@@ -16,29 +16,6 @@ const query_modes = [
     "delete",
     "view",
 ];
-
-// const prm_structure = [
-//     "type",
-//     "maxlength",
-//     "nullable"
-// ];
-// const queries = [
-//     "users" => [
-//         "create" => [
-//             "call" => "{CALL adduser (?)}",
-//             "prm0" => [
-//                 ""
-//             ]
-//         ],  
-//         "view"   => "{CALL viewusers (?)}"
-//     ],
-//     "posts" => [
-//         "create" => "{CALL addpost (?,?)}",
-//         "delete" => "{CALL removepost(?)}",
-//         "view"   => "{CALL viewuserposts(?)}"
-//     ]
-// ];
-
 
 const queries = [
     "users" => [
@@ -61,7 +38,6 @@ function configure_db( $script )
     $query = file_get_contents( $script );
     if ($query === false)
     {
-        // error occured during file read
         printf("Error occurred while reading sql query from $script.");
         return false;
     }
@@ -83,12 +59,65 @@ function configure_db( $script )
     return true;
 }
 
+/**
+ * @brief Provides the boilerplate code to handle initializing an sql 
+ *        connection and calling a stored procedure, using mysqli. Can be given
+ *        a callback function (and parameters) to handle result sets. 
+ * @param string $query
+ *        The SQL statement that will call the desired SQL stored procedure.
+ * @param array  $ptype   [ = [] ]
+ *        A list of parameter types pertaining to each parameter that will be 
+ *        bound to the prepared statement calling the procedure.
+ *        Where no value is specified, "s" (string) will be assumed.
+ *        - 
+ *        Entries must be numerically indexed.
+ *        - 
+ *        Valid entries:
+ *          i -- integer
+ *          d -- double
+ *          s -- string
+ *          b -- blob (will be sent in packets)
+ *        - 
+ *        No checking is done for validity of the arguments. Providing values 
+ *        other than i, d, s, or b may result in unknown behavior or errors.
+ *        -
+ *        See https://www.php.net/manual/en/mysqli-stmt.bind-param.php
+ * @param array  $parms   [ = [] ]
+ *        The list of parameters, in order, that should be bound to the stored 
+ *        procedure call. The types of each argument should be indicated in
+ *        $ptype. The length of the array should match the number of fields 
+ *        in the stored procedure call.
+ * @param array  $cbparms [ = [] ]
+ *        Array containing parameters to be passed to the callback function.
+ *        The array will be unpacked into individual arguments, passed in the 
+ *        order they are provided (and preceded by $sql and $stmt). An empty 
+ *        array has no effect.
+ * @param string|null $cb [ = null ]
+ *        String that is the fully-qualified name of the callback function.
+ *        When not null, call_procedure() returns by calling this function
+ *        immediately after statement execution with the following arguments:
+ *          - $sql (the mysqli object)
+ *          - $stmt (the mysqli statement (procedural) where the procedure 
+ *             was executed. Contains the results of the query.)
+ *          - ...$parms, if $fwparms = true 
+ *          - ...$cbparms
+ *        When null, the value returned by mysqli_stmt_execute will be returned
+ *        instead (see https://www.php.net/manual/en/mysqli-stmt.execute.php).
+ * @param bool $fwparms   [ = false ]
+ *        Whether or not the parameters passed to the procedure should be 
+ *        provided to the callback as well. When set to true, they will be 
+ *        unpacked as parameters immediately before $cbparms.
+ * @param object $sql     [ = null ]
+ *        If desired, an existing mysqli object can be passed rather than 
+ *        being initialized in the function.
+ */
 function call_procedure( 
     $query, 
     $ptype = [],
     $parms = [],
     $cbparms = [],
     $cb = null,
+    $fwparms = false,
     $sql = null
 ) {
     if (debug) print "<pre>";
@@ -96,7 +125,7 @@ function call_procedure(
     
     if ($sql === null) 
     {
-        // mysqli_report(errmode);
+        mysqli_report(errmode);
         $sql = new mysqli(host, user, pass);
         if ($sql->connect_errno)
         {
@@ -127,8 +156,7 @@ function call_procedure(
         mysqli_stmt_execute($stmt);
             if (debug) print "Executed.\n";
             if (debug) var_dump($stmt);
-        // $parameters = [$sql, $stmt];
-        // todo - build the array with several conditions, then unpack in cb args
+        if ($fwparms) $cbparms = array_merge( $parms, $cbparms );
         return $cb($sql, $stmt, ...$cbparms);
     } else {
         $res = mysqli_stmt_execute($stmt);
@@ -150,6 +178,11 @@ function create_user( $user )
     else 
         return false;
 }
+
+// function create_post( $user, $text )
+// {
+// 
+// }
 
 
 function user_exists( $user )
