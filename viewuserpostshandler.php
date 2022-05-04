@@ -12,4 +12,4 @@ $user = ($valid) ? $_POST["user"] : "--";
 ## 
 html_open("Viewing $user's Posts");
 view_user_posts($user);
-html_close();
+html_close(true);

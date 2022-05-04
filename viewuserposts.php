@@ -5,4 +5,4 @@ print '<form method="post" action="./viewuserpostshandler.php">';
 select_users();
 print '<p><input type="submit" value="Submit"></p>';
 print '</form>';
-html_close();
+html_close(true);
