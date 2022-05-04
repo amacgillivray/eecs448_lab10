@@ -225,8 +225,8 @@ function user_exists( $user )
 {
     return call_procedure(
         queries["users"]["view"],
-        ["s"],
-        [$user],
+        [],
+        [],
         [$user],
         "user_exists_cb"
     );
