@@ -13,7 +13,7 @@ require_once("/home/a637m351/eecs448lab10pw.php");
  *        user input to the page and break the code. Thus, this value should 
  *        ABSOLUTELY be set to false in release.
  */
-const debug = 0;
+const debug = 1;
 
 /**
  * @const host
@@ -267,5 +267,8 @@ function html_open( $title )
 
 function html_close()
 {
+    print '<footer>
+           <a href="./index.html">&laquo; Back to Index</a>
+           </footer>';
     print '</body></html>';
 }
