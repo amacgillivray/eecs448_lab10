@@ -1,5 +1,9 @@
 <?php
 /**
+ * @file createuser.php
+ * @brief Form handler for createuser.html. 
+ *
+ * @details
  * Reqs: 
  *  Store user if:
  *      User has content and does not match an existing user in the database
@@ -8,43 +12,28 @@
 
 require_once("./common.php");
 
-$valid = (isset($_POST["user"]));
-$user = "--";
-if ($valid)
-    $user = $_POST["user"];
+## 
+# GETTING POST ARGUMENTS
+##
+$valid = (isset($_POST["user"]) && strlen($_POST["user"]) > 0);
+$user = ($valid) ? $_POST["user"] : "--";
 
-if (strlen($user) == 0)
-{
-    $user = "--";
-    $valid = false;
-}
-// $user = ($valid) ? $_POST["user"] : "--";
-
-// function create_user( $user )
-// {
-//     $query = queries["users"]["create"];
-// }
-
-
-
-
-
+## 
+# BUILDING THE PAGE
+##
 html_open("Create User " . $user);
-
-var_dump($_POST);
-
 if ($valid){
+    # Describe the action that is being performed
     print "<p>Creating user: <kbd>" . $user . "</kbd></p>";     
+    
+    # Describe the result of the action
     if (create_user($user))
-    {
-        create_user($user);
         print "<p>User created successfully.</p>";
-    } else {
+    else 
         print "<p>Unable to create user <kbd>".$user."</kbd>: User already exists.</p>";
-    }
 } else {
+    # If the argument was invalid, inform the user
     print "<p>Error: Could not create user. <br/>" .
           "Non-empty user argument (required) was not provided.</p>";
 }
-
 html_close();
