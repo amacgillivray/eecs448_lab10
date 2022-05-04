@@ -254,9 +254,33 @@ function user_exists_cb($sql, $stmt, $user)
     if (debug) print "Evaluated all results.\n";
     if (debug) print "</pre>";
     
-    mysqli_stmt_free_result($stmt);
     $sql->close();
     return $user_exists;
+}
+
+function view_users()
+{
+    return call_procedure(
+        queries["users"]["view"],
+        [],
+        [],
+        [],
+        "view_users_cb"
+    );
+}
+
+function view_users_cb($sql, $stmt)
+{
+    do {
+        if ($result = mysqli_stmt_get_result($stmt))
+        {
+            print "<ul>";
+            $crawl = $result->fetch_all();
+            for ($i = 0; $i < sizeof($crawl); $i++)
+                print "<li>" . $crawl[$i][0];
+            print "</ul>";
+        }
+    } while (mysqli_stmt_next_result($stmt) && !$user_exists);
 }
 
 function html_open( $title )
