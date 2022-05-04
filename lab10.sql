@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS posts
 ) //
 
 -- ADD USER
+DROP PROCEDURE adduser;
 CREATE PROCEDURE 
     adduser ( IN arguser VARCHAR (30) ) 
 LANGUAGE SQL
@@ -30,6 +31,7 @@ END//
 -- VIEW USERS
     -- Note: no "view user" as there is no data to fetch if you already 
     -- know the id of the user
+DROP PROCEDURE viewusers;
 CREATE PROCEDURE 
     viewusers () 
 LANGUAGE SQL
@@ -42,6 +44,7 @@ END//
 
 
 -- ADD POST
+DROP PROCEDURE addpost;
 CREATE PROCEDURE 
     addpost ( 
         IN arguser VARCHAR (30),
@@ -54,6 +57,7 @@ BEGIN
     VALUES ( argpost, arguser );
 END//
 -- REMOVE POST
+DROP PROCEDURE removepost;
 CREATE PROCEDURE 
     removepost ( 
         IN argpost_id INT
@@ -64,6 +68,18 @@ BEGIN
     DELETE FROM posts  
     WHERE posts.post_id = argpost_id;
 END//
--- READ POST
+-- READ POSTS FROM USER
+DROP PROCEDURE viewuserposts;
+CREATE PROCEDURE 
+    viewuserposts ( 
+        IN arguser_id VARCHAR (30) NOT NULL
+    )
+LANGUAGE SQL
+READS SQL DATA
+BEGIN 
+    SELECT * FROM posts   
+    WHERE posts.author_id = arguser_id
+    ORDER BY posts.post_id;
+END//
 
 delimiter ;

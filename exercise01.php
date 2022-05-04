@@ -1,16 +1,16 @@
 <?php
 require_once("./common.php");
+html_open("Exercise 01 - Create Tables");
 ?>
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Exercise 01 - Create Tables</title>
-        <link rel="stylesheet" href="./style.css">
-    </head>
-    <body>
+        <h1>Running Lab10.sql</h1>
         <?php 
-        configure_db("lab10.sql"); 
-        print("<p>Database successfully configured.</p>"); 
+        print "<p>";
+        if (configure_db( "./lab10.sql" )); 
+            print "Script ran successfully.";
+        print "</p>";
         ?>
-    </body>
-</html>
+        <h2>SQL used to generate table:</h2>
+        <pre>
+            <?php print( file_get_contents("./lab10.sql") ); ?>
+        </pre>
+<?php html_close(); ?>
