@@ -26,7 +26,6 @@ $v = ($vp && $vu); # Valid args?
 html_open("Handling Post Creation");
 if ($v)
 {
-    $post = base64_encode($post);
     print "<h1>Creating post for $user</h1>";
     # Create the post
     if (create_post( $user, $post ))
