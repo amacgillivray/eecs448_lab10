@@ -59,31 +59,6 @@ const queries = [
 ];
 
 /**
- * @brief Uses exercise01.sql to configure the database with the user and post tables.
- */
-function configure_db( $script )
-{
-    $result = "";
-    $query = file_get_contents( $script );
-    if ($query === false)
-    {
-        printf("Error occurred while reading sql query from $script.");
-        return false;
-    }
-
-    // mysqli_report(errmode);
-    $sql = new mysqli(host, user, pass);
-    if ($sql->connect_errno)
-    {
-        printf("Connect failed: %s\n", $mysqli->connect_error);
-        return false;
-    }
-    $sql->query($query);
-    $sql->close();
-    return true;
-}
-
-/**
  * @brief Provides the boilerplate code to handle initializing an sql 
  *        connection and calling a stored procedure, using mysqli. Can be given
  *        a callback function (and parameters) to handle result sets. 
