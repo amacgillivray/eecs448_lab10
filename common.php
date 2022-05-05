@@ -13,7 +13,7 @@ require_once("/home/a637m351/eecs448lab10pw.php");
  *        user input to the page and break the code. Thus, this value should 
  *        ABSOLUTELY be set to false in release.
  */
-const debug = 0;
+const debug = 1;
 
 /**
  * @const host
@@ -140,11 +140,12 @@ function call_procedure(
     $typestring = "";
     for ($i = 0; $i < sizeof($parms); $i++)
         $typestring .= (isset($ptype[$i])) ? $ptype[$i] : "s";
-    mysqli_stmt_bind_param(
-        $stmt,
-        $typestring,
-        ...$parms
-    );
+    if (sizeof($parms) > 0)
+        mysqli_stmt_bind_param(
+            $stmt,
+            $typestring,
+            ...$parms
+        );
     
     if ($cb != null)
     {
@@ -165,6 +166,10 @@ function call_procedure(
     }
 }
 
+/**
+ * @brief Creates a user
+ * @param string $user 
+ */
 function create_user( $user )
 {
     if (!user_exists($user))
@@ -177,6 +182,11 @@ function create_user( $user )
         return false;
 }
 
+/**
+ * @brief Creates a post
+ * @param string $user
+ * @param string $text
+ */
 function create_post( $user, $text )
 {
     if (user_exists($user)) {
@@ -190,7 +200,11 @@ function create_post( $user, $text )
     }
 }
 
-
+/**
+ * @brief  Checks if a user exists
+ * @param  string $user
+ * @return bool
+ */
 function user_exists( $user )
 {
     return call_procedure(
@@ -202,6 +216,9 @@ function user_exists( $user )
     );
 }
 
+/**
+ * @brief Callback for user_exists; parses results of the query
+ */
 function user_exists_cb($sql, $stmt, $user)
 {
     $user_exists = false;
@@ -228,6 +245,9 @@ function user_exists_cb($sql, $stmt, $user)
     return $user_exists;
 }
 
+/**
+ * @brief Prints a <ul> list of all records in the users table
+ */
 function view_users()
 {
     return call_procedure(
@@ -239,6 +259,9 @@ function view_users()
     );
 }
 
+/**
+ * @brief Callback for view_users
+ */
 function view_users_cb($sql, $stmt)
 {
     do {
@@ -253,6 +276,10 @@ function view_users_cb($sql, $stmt)
     } while (mysqli_stmt_next_result($stmt) && !$user_exists);
 }
 
+/** 
+ * @brief Prints a "select" / dropdown menu containing options for
+ *        all of the records in the users table. 
+ */
 function select_users()
 {
     return call_procedure(
@@ -264,6 +291,9 @@ function select_users()
     );
 }
 
+/**
+ * @brief Callback for select_users
+ */
 function select_users_cb($sql, $stmt)
 {
     print "<label for=\"user\">Select User</label>";
@@ -281,6 +311,9 @@ function select_users_cb($sql, $stmt)
     print "</select>";
 }
 
+/**
+ * @brief Creates a view with all posts from a given user
+ */
 function view_user_posts( $user )
 {
     return call_procedure(
@@ -292,6 +325,9 @@ function view_user_posts( $user )
     );
 }
 
+/** 
+ * @brief Callback for view_user_posts
+ */
 function view_user_posts_cb($sql, $stmt)
 {
     print   '<table>' .
@@ -310,6 +346,19 @@ function view_user_posts_cb($sql, $stmt)
     print "</tbody></table>";
 }
 
+/** 
+ * @brief Creates a view for deleting posts from any user.
+ * @details 
+ * Has two levels. First, gets a list of all users in the system 
+ *  using delete_view_cb()
+ * Then, delete_view_cb iterates over the list of users and calls
+ *  the procedure to get posts from a user on each one. The posts 
+ *  are parsed and printed in tabular format by delete_view_user_cb. 
+ * Naming could be better but this will do for a lab. 
+ * @see  call_procedure()
+ * @uses delete_view_cb() via call_procedure()
+ * @uses delete_view_user_cb() via call_procedure in delete_view_cb()
+ */
 function create_delete_view()
 {
     return call_procedure(
@@ -321,6 +370,9 @@ function create_delete_view()
     );
 }
 
+/** 
+ * @brief Callback for create_delete_view
+ */
 function delete_view_cb( $sql, $stmt )
 {
     $users = [];
@@ -348,6 +400,9 @@ function delete_view_cb( $sql, $stmt )
     }
 }
 
+/** 
+ * @brief Callback for create_delete_view (level 2) 
+ */
 function delete_view_user_cb( $sql, $stmt, $user )
 {
     do {
@@ -364,6 +419,11 @@ function delete_view_user_cb( $sql, $stmt, $user )
     } while (mysqli_stmt_next_result($stmt) && !$user_exists);
 }
 
+/** 
+ * @brief Deletes the post with the specified ID
+ * @param int $post 
+ *        The ID of the post to be deleted.
+ */
 function delete_post( $post )
 {
     return call_procedure(
@@ -373,6 +433,9 @@ function delete_post( $post )
     );
 }
 
+/** 
+ * Prints opening HTML boilerplate with given title.
+ */
 function html_open( $title )
 {
     print 
@@ -385,6 +448,10 @@ function html_open( $title )
         <body>';
 }
 
+/** 
+ * Prints closing HTML boilerplate. When $admin is true, links to adminhome 
+ *  instead of index.html 
+ */
 function html_close( $admin = false )
 {
     print '<footer>';
